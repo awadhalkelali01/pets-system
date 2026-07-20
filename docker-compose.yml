@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: pets-db
+    restart: always
+    environment:
+      POSTGRES_DB: pets
+      POSTGRES_USER: pets
+      POSTGRES_PASSWORD: pets123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: pets-api
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      DATABASE_URL: postgresql://pets:pets123@postgres:5432/pets
+
+  frontend:
+    build: ./frontend
+    container_name: pets-web
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  postgres_data:
